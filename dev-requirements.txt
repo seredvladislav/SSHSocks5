@@ -1,0 +1,7 @@
+pip==18.1
+paramiko
+pypiwin32
+pyinstaller
+psutil
+cython
+vulture
