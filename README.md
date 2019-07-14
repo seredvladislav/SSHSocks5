@@ -17,7 +17,7 @@ python ssh_socks.py -ssh 10.10.10.2 -P 22 -l cooluser -pw coolpassword -D 127.0.
 All other args will be ignored      
 # Make exe on Windows:      
 pip install -r dev-requirements.txt     
-## pyinstaller:
+## pyinstaller (recommended):
 pyinstaller ssh_socks.spec        
 cd your_build_dir       
 ssh_socks.exe -ssh 10.10.10.2 -P 22 -l cooluser -pw coolpassword -D 127.0.0.1:7000  

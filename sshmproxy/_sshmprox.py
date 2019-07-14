@@ -162,7 +162,8 @@ class SocketPipe(object):
 
     def stop(self):
         self._socket1.close()
-        self._socket2.close()
+        # do not close socket!
+        #self._socket2.close()
         self.__running = False
 
     def is_running(self):
@@ -206,6 +207,8 @@ class CommandExecutor(object):
         socket_pipe.start()
         while socket_pipe.is_running():
             pass
+        #TODO remove that debug print
+        print connection
 
     def do_bind(self):
         pass
