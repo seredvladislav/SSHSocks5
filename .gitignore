@@ -1,0 +1,5 @@
+venv27
+build
+dist
+.idea
+*.pyc

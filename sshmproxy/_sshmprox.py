@@ -384,21 +384,30 @@ class SshTransport():
         self.ssh_password = ssh_password
         self.ssh_port = ssh_port
         self.connection = None
+        self.client = None
         # self.connection = self._get_connection()
         self.errors = 0
         self.max_errors = 50
 
     def _get_connection(self):
+        if self.connection:
+            self.connection.close()
+        self.connection = None
         try:
             logging.info('Connecting to %s port %d' % (self.ssh_host, self.ssh_port))
-            client = paramiko.SSHClient()
-            client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            client.connect(
+            self.client = paramiko.SSHClient()
+            self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            self.client.connect(
                 hostname=self.ssh_host, port=self.ssh_port, username=self.ssh_user,
-                password=self.ssh_password, timeout=30,
+                password=self.ssh_password, timeout=5,
             )
-            self.connection = client.get_transport()
-            logging.info('Authenticated to %s ([%s]:%d).' % (self.ssh_host, self.ssh_host, self.ssh_port))
+            self.connection = self.client.get_transport()
+            if self.connection.is_authenticated():
+                logging.info('Authenticated to %s ([%s]:%d).' % (self.ssh_host, self.ssh_host, self.ssh_port))
+            else:
+                logging.info('NOT Authenticated to %s ([%s]:%d), ignoring...' % \
+                             (self.ssh_host, self.ssh_host, self.ssh_port))
+            self.connection.set_keepalive(5)
         except Exception as e:
             logging.info('FATAL ERROR: %s' % e.message)
             self.errors = self.errors + 1
@@ -408,12 +417,9 @@ class SshTransport():
     def get_connection(self):
         if self.errors > self.max_errors:
             return
+        # do not use is_authenticated!
         if self.connection is None or self.connection.is_active() is not True:
-            for _ in range(0, 3):
-                transport = self._get_connection()
-                if transport:
-                    return transport
-                time.sleep(1)
+            self._get_connection()
         return self.connection
 
 
@@ -436,6 +442,7 @@ def main_worker(ssh_host, ssh_user, ssh_password, ssh_port, socks_host, socks_po
         logging.error('Bad ssh connection')
         return
     # pdb.set_trace()
+
     Socks5Server.allow_reuse_address = True
     socks5_server = Socks5Server(
         socks_host=socks_host, socks_port=socks_port, auth=False, user_manager=UserManager(),
@@ -450,7 +457,7 @@ def main_worker(ssh_host, ssh_user, ssh_password, ssh_port, socks_host, socks_po
         proc.start()
         try:
             if transport.connection:
-                transport.connection().close()
+                transport.connection.close()
         except Exception:
             pass
         try:
@@ -489,6 +496,7 @@ def main():
             return False
         if resp.status_code != 200:
             logging.error("FAILED CODE %s" % proxy_conn)
+            resp.close()
             return False
         resp.close()
         try:

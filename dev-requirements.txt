@@ -2,6 +2,7 @@ pip==18.1
 paramiko
 pypiwin32
 pyinstaller
+py2exe_py2
 psutil
 cython
 vulture

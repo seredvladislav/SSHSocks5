@@ -17,6 +17,10 @@ def _ugly_helpers_import_for_future_compile():
 
 
 if __name__ == '__main__':
-    from _sshmprox import main
+    # https://github.com/pyinstaller/pyinstaller/wiki/Recipe-Multiprocessing
+    import multiprocessing
+
+    multiprocessing.freeze_support()
+    from sshmproxy import main
 
     main()
