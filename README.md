@@ -1,4 +1,5 @@
-# SSHSocks5 (Development in progress)
+# SSHSocks5 (like ssh -D)    
+### (Development in progress)
 based on code from https://github.com/fengyouchao/pysocks - source included as _socks5.py       
 based on ideas from https://getssh.net/software          
 python 2.7 code compatibility       
